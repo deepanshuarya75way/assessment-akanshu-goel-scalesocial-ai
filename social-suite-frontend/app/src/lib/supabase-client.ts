@@ -1,20 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 
-/**
- * Auth happens directly against Supabase from the browser — the FastAPI
- * backend (per app/api/deps.py) only ever *verifies* the JWT Supabase
- * issues; it has no login/refresh endpoints of its own. Supabase's SDK
- * handles token refresh automatically (autoRefreshToken below), so the
- * axios interceptor in services/api-client.ts just reads whatever
- * session it currently holds rather than calling a backend refresh route.
- */
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error("Supabase environment variables are missing");
+}
+
 export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
-      autoRefreshToken: true,
       persistSession: true,
+      autoRefreshToken: true,
       detectSessionInUrl: true,
     },
   }
